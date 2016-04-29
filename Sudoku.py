@@ -15,6 +15,40 @@ It is designed to work according to the QUIET tools interface.
 '''
 
 #<COMMON_CODE>
+def DEEP_EQUALS(s1, s2):
+	if len(s1) != len(s2) or len(s1[0]) != len(s2[0]):
+		return False
+
+	for i in range(len(s1)):
+		for j in range(len(s1)):
+			if s1[i][j] != s2[i][j]:
+				return False
+
+	return True
+
+def DESCRIBE_STATE(s):
+	return render_state(s)
+
+def HASHCODE(s):
+	return str(s)
+
+def copy_state(s):
+	new = [[-1 for x in range(9)] for y in range(9)]
+	for i in len(s):
+		for j in len(s):
+			new[i][j] = s[i][j]
+
+	return new
+
+def goal_test(s):
+	for i in range(len(s)):
+		for j in range(len(s)):
+			if s[i][j] == -1:
+				return False
+
+def goal_message(s):
+	return "Your Sudoku has been solved!!"
+
 
 class Operator:
   def __init__(self, name, precond, state_transf):
@@ -27,6 +61,13 @@ class Operator:
 
   def apply(self, s):
     return self.state_transf(s)
+
+def move(s, n, x, y):
+	new = copy_state(s)
+	new[x][y] = n
+	return new
+
+
 #</COMMON_CODE>
 
 #<COMMON_DATA>
@@ -121,7 +162,7 @@ def render_state(s):
 		if i == 2 or i == 5: # TO-DO: Avoid hard coding if time
 			text += "----------------------------\n"
 
-	print(text)
+	return text
  
 #</STATE_VIS>
 
