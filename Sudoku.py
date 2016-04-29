@@ -1,12 +1,12 @@
 ''' Sudoku.py
-Luxun Lu & Eden Ghirmai 
+Luxun Xu & Eden Ghirmai 
 CSE415 Spr16 - 4/29/2015
 Assignment 4: Problem Formulation
 '''
 
 #<METADATA>
 PROBLEM_NAME = "Sudoku"
-PROBLEM_AUTHORS = ['Eden Ghirmai', 'Luxun Lu']
+PROBLEM_AUTHORS = ['Eden Ghirmai', 'Luxun Xu']
 PROBLEM_CREATION_DATE = "29-APR-2016"
 PROBLEM_DESC=\
 '''This formulation of the basic eight puzzle uses generic
@@ -32,10 +32,19 @@ def DESCRIBE_STATE(s):
 def HASHCODE(s):
 	return str(s)
 
+def space_occupied(s):
+	result = 0
+	for i in range(len(s)):
+		for j in range(len(s)):
+			if s[i][j] != -1:
+				result += 1
+	
+	return result	
+
 def copy_state(s):
 	new = [[-1 for x in range(9)] for y in range(9)]
-	for i in len(s):
-		for j in len(s):
+	for i in range(len(s)):
+		for j in range(len(s)):
 			new[i][j] = s[i][j]
 
 	return new
@@ -45,6 +54,8 @@ def goal_test(s):
 		for j in range(len(s)):
 			if s[i][j] == -1:
 				return False
+
+	return True
 
 def goal_message(s):
 	return "Your Sudoku has been solved!!"
@@ -68,7 +79,62 @@ def move(s, n, x, y):
 	return new
 
 
+def can_move(s, n, x, y):
+	if (s[x][y] != -1):
+		return False
+
+	#check row
+	row = s[x]
+	for num in row:
+		if num == n:
+			return False
+
+	#check col
+	for row in s:
+		if row[y] == n:
+			return False
+
+	#check box	
+	for row in range(3):
+		for col in range(3):
+			if(s[row + (x  - x % 3)][col + (y - y %3)] == n):
+				return False
+
+	return True
+
+
 #</COMMON_CODE>
+
+def h_euclidean(s):
+  return space_occupied(s)
+
+
+def h_hamming(s):
+  result = 0
+  for tile in s:
+    if s.index(tile) != GOAL_STATE.index(tile):
+      result += 1
+
+  return result
+
+def h_manhattan(s):
+  result = 0
+  for tile in s:
+    goal_index = GOAL_STATE.index(tile)
+    goal_total = find_row(goal_index) + find_column(goal_index)
+    state_total = find_row(s.index(tile)) + find_row(s.index(tile))
+    result += abs(goal_total - state_total)
+
+  return result
+
+def h_custom(s):
+  result = 0
+  for tile in s:
+    if s.index(tile) != GOAL_STATE.index(tile):
+      result += 100
+
+  return result
+
 
 #<COMMON_DATA>
 #</COMMON_DATA>
@@ -105,18 +171,42 @@ INITIAL_STATE[7][8] = 2
 INITIAL_STATE[8][0] = 6
 INITIAL_STATE[8][7] = 6
 
-CREATE_INITIAL_STATE = lambda: INITIAL_STATE
+# http://www.sudokukingdom.com/very-easy-sudoku.php
+EASY_GAME = [[-1, 7, 2, -1,  -1, 1, 8,  -1, 5],
+			 [-1, 5, 1, -1, 3, 7, -1, 9, -1],
+			 [4, -1, -1, 2, -1, 8, 1, -1, 7],
+			 [-1, 4, 7, 5, 2, -1, 3, -1, -1],
+			 [-1, 2, 6, 7, -1, -1, 5, -1, 1],
+			 [5, -1, -1, 1, -1, 6, -1, 2, 9],
+			 [2, 9, -1, 3, 7, -1, -1, 1, -1],
+			 [7, -1, -1, -1, 6, 2, -1, 5, 3],
+			 [3, -1, 8, -1, 1, -1, 2, 7, -1]]
+
+
+
+CREATE_INITIAL_STATE = lambda: EASY_GAME
 
 #</INITIAL_STATE>
 
 #<OPERATORS>
 options = []
+temp = copy_state(EASY_GAME)
 for x in range(9):
 	for y in range(9):
+		can_moves = []
 		for n in range(1, 10):
-			options.append((n, x, y))
+			if can_move(temp, n, x, y):
+				can_moves.append((n, x, y))	
 
-OPERATORS = [Operator("Add number " + str(n) + "to row " + str(x) + " and column " + str(y), 
+		if len(can_moves) == 1:
+			temp = move(temp, can_moves[0][0], can_moves[0][1], can_moves[0][2])
+		else:
+			for option in can_moves:
+				options.append(option)
+
+
+
+OPERATORS = [Operator("Add number " + str(n) + " to row " + str(x) + " and column " + str(y), 
 					  lambda s, n=n, x=x,  y=y: can_move(s, n, x, y),			
             	  	  lambda s, n=n, x=x, y=y: move(s, n, x, y))
             for (n, x, y) in options]
@@ -124,10 +214,11 @@ OPERATORS = [Operator("Add number " + str(n) + "to row " + str(x) + " and column
 #</OPERATORS>
 
 #<GOAL_TEST>
+GOAL_TEST = lambda s: goal_test(s)
 #</GOAL_TEST>
 
 #<GOAL_MESSAGE_FUNCTION> 
-
+GOAL_MESSAGE_FUNCTION = lambda s: goal_message(s)
 #</GOAL_MESSAGE_FUNCTION>
 
 #<STATE_VIS>
@@ -167,3 +258,5 @@ def render_state(s):
 #</STATE_VIS>
 
 
+HEURISTICS = {'h_euclidean': h_euclidean, 'h_hamming':h_hamming,
+    'h_manhattan':h_manhattan, 'h_custom':h_custom}
