@@ -32,15 +32,6 @@ def DESCRIBE_STATE(s):
 def HASHCODE(s):
 	return str(s)
 
-def space_occupied(s):
-	result = 0
-	for i in range(len(s)):
-		for j in range(len(s)):
-			if s[i][j] != -1:
-				result += 1
-	
-	return result	
-
 def copy_state(s):
 	new = [[-1 for x in range(9)] for y in range(9)]
 	for i in range(len(s)):
@@ -105,71 +96,33 @@ def can_move(s, n, x, y):
 
 #</COMMON_CODE>
 
-def h_euclidean(s):
-  return space_occupied(s)
-
-
-def h_hamming(s):
-  result = 0
-  for tile in s:
-    if s.index(tile) != GOAL_STATE.index(tile):
-      result += 1
-
-  return result
-
-def h_manhattan(s):
-  result = 0
-  for tile in s:
-    goal_index = GOAL_STATE.index(tile)
-    goal_total = find_row(goal_index) + find_column(goal_index)
-    state_total = find_row(s.index(tile)) + find_row(s.index(tile))
-    result += abs(goal_total - state_total)
-
-  return result
-
 def h_custom(s):
-  result = 0
-  for tile in s:
-    if s.index(tile) != GOAL_STATE.index(tile):
-      result += 100
-
-  return result
-
+	'Returns the amount of spaces that are occupied'
+	result = 0
+	for i in range(len(s)):
+		for j in range(len(s)):
+			if s[i][j] != -1:
+				result += 1
+	
+	return result	
 
 #<COMMON_DATA>
 #</COMMON_DATA>
 
 #<INITIAL_STATE>
 # -1 resembles an empty spot
+
 # http://www.theguardian.com/lifeandstyle/2016/apr/28/sudoku-3421-hard
-INITIAL_STATE = [[-1 for x in range(9)] for y in range(9)]
-INITIAL_STATE[0][1] = 1
-INITIAL_STATE[0][4] = 3
-INITIAL_STATE[0][7] = 8
-INITIAL_STATE[1][0] = 8
-INITIAL_STATE[1][2] = 6
-INITIAL_STATE[1][6] = 3
-INITIAL_STATE[1][8] = 9
-INITIAL_STATE[2][2] = 4
-INITIAL_STATE[2][3] = 9
-INITIAL_STATE[2][7] = 7
-INITIAL_STATE[3][2] = 9
-INITIAL_STATE[3][4] = 4
-INITIAL_STATE[3][5] = 7
-INITIAL_STATE[4][5] = 1
-INITIAL_STATE[4][8] = 5
-INITIAL_STATE[5][2] = 1
-INITIAL_STATE[5][6] = 6
-INITIAL_STATE[6][1] = 7
-INITIAL_STATE[6][3] = 6
-INITIAL_STATE[6][5] = 8
-INITIAL_STATE[6][6] = 4
-INITIAL_STATE[6][7] = 9 
-INITIAL_STATE[7][1] = 8
-INITIAL_STATE[7][2] = 3
-INITIAL_STATE[7][8] = 2
-INITIAL_STATE[8][0] = 6
-INITIAL_STATE[8][7] = 6
+INITIAL_STATE =  [[-1, 1, -1, -1, 3, -1, -1, 8, -1],
+				  [8, -1, 6, -1, -1, -1, 3, -1, 9],
+			      [-1, -1, 4, 9, -1, -1, -1, 7, -1],
+				  [-1, -1, 9, -1, 4, 7, -1, -1, -1],
+				  [-1, -1, -1, -1, -1, 1, -1, -1, 5],
+				  [-1, -1, 1, -1, -1, -1, 6, -1, -1],
+				  [-1, 7, -1, 6, -1, 8, 4, 9, -1],
+				  [-1, 8, 3, -1, -1, -1, -1, -1, 2],
+				  [6, -1, -1, -1, -1, -1, -1, 5, -1]]
+
 
 # http://www.sudokukingdom.com/very-easy-sudoku.php
 EASY_GAME = [[-1, 7, 2, -1,  -1, 1, 8,  -1, 5],
@@ -190,7 +143,7 @@ CREATE_INITIAL_STATE = lambda: EASY_GAME
 
 #<OPERATORS>
 options = []
-temp = copy_state(EASY_GAME)
+temp = copy_state(CREATE_INITIAL_STATE())
 for x in range(9):
 	for y in range(9):
 		can_moves = []
@@ -258,5 +211,4 @@ def render_state(s):
 #</STATE_VIS>
 
 
-HEURISTICS = {'h_euclidean': h_euclidean, 'h_hamming':h_hamming,
-    'h_manhattan':h_manhattan, 'h_custom':h_custom}
+HEURISTICS = {'h_custom':h_custom}

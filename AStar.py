@@ -4,7 +4,7 @@ CSE415 Spr16 - 4/20/2015
 Assignment 3: Counting States and Working with A* Search
 
 Examples of Usage:
-python3 AStar.py EightPuzzleWithHeuristics h_euclidean puzzle4a.py
+python3 AStar.py EightPuzzleWithHeuristics h_custom
 '''
 
 import sys
@@ -12,7 +12,7 @@ import queue
 
 if sys.argv==[''] or len(sys.argv)<4:
   import Sudoku as Problem
-  h_heuristics = Problem.HEURISTICS['h_euclidean']
+  h_heuristics = Problem.HEURISTICS['h_custom']
 else:
   import importlib
   Problem = importlib.import_module(sys.argv[1])
