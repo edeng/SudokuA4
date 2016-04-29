@@ -15,6 +15,18 @@ It is designed to work according to the QUIET tools interface.
 '''
 
 #<COMMON_CODE>
+
+class Operator:
+  def __init__(self, name, precond, state_transf):
+    self.name = name
+    self.precond = precond
+    self.state_transf = state_transf
+
+  def is_applicable(self, s):
+    return self.precond(s)
+
+  def apply(self, s):
+    return self.state_transf(s)
 #</COMMON_CODE>
 
 #<COMMON_DATA>
@@ -52,9 +64,22 @@ INITIAL_STATE[7][8] = 2
 INITIAL_STATE[8][0] = 6
 INITIAL_STATE[8][7] = 6
 
+CREATE_INITIAL_STATE = lambda: INITIAL_STATE
+
 #</INITIAL_STATE>
 
 #<OPERATORS>
+options = []
+for x in range(9):
+	for y in range(9):
+		for n in range(1, 10):
+			options.append((n, x, y))
+
+OPERATORS = [Operator("Add number " + str(n) + "to row " + str(x) + " and column " + str(y), 
+					  lambda s, n=n, x=x,  y=y: can_move(s, n, x, y),			
+            	  	  lambda s, n=n, x=x, y=y: move(s, n, x, y))
+            for (n, x, y) in options]
+
 #</OPERATORS>
 
 #<GOAL_TEST>
@@ -83,7 +108,7 @@ INITIAL_STATE[8][7] = 6
 def render_state(s):
 	text = "\n"
 	for i in range(len(s)):
-		for j in range(len(s)):
+		for j in range(len(s[0])):
 			if s[i][j] == -1:
 				text += " . "
 			else:
